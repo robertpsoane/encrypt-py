@@ -11,8 +11,9 @@ class PrimeGenerator:
         # Start with a clearly false number to enter loop
         p = 4
         while self.checkPrime(p, n_tests) == False:
-            p = self.generateCandidate(size)
             #print('Testing p = {}'.format(p))
+            p = self.generateCandidate(size)
+            
         self.primes.append(p)
         return p
 
@@ -27,7 +28,7 @@ class PrimeGenerator:
             while unique == False:
                 p = getrandbits(size)
                 p |= (1<<size-1) | 1
-                if p in self.primes == False:
+                if (p in self.primes) == False:
                     unique = True
             return p
     
@@ -66,3 +67,6 @@ class PrimeGenerator:
                     return False
         return True
 
+G = PrimeGenerator()
+print(G.generate(40))
+print(G.generate(40))

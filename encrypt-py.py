@@ -10,24 +10,34 @@ import math
 class RSAEncryptor:
     def __init__(self):
         self.PrimeGenerator = PrimeGenerator()
+        self.encoder = NumericalEncoder()
 
     def generateKeys(self, size):
-        self.PrimeGenerator.generate(size)
-        private = 5
+        p = self.PrimeGenerator.generate(size)
+        q = self.PrimeGenerator.generate(size)
+        n = p * q
+        phipq = phi(p,q)
+        
+
         print('Private Key = {}.  Please write this down as it will not be stored once this script is closed.'.format(private))
         self.private = private
         self.public = public
         return private, public
     
+    def phi(self, p, q):
+        return (p - 1) * (q - 1)
+
     def countBits(self, n):
         # Code from https://www.geeksforgeeks.org/count-total-bits-number/
         # log function in base 2  
         # take only integer part
-         
         return int((math.log(n) / math.log(2)) + 1)
 
     def encrypt(self, message):
-        pass
+        self.message = message
+        self.encoded_message = self.encoder.encode(message)
+        message_size = self.countBits(self.encoded_message)
+        private, public = self.generateKeys(message_size)
 
 class NumericalEncoder:
     def __init__(self):
