@@ -66,7 +66,3 @@ class PrimeGenerator:
                 if x != p - 1:
                     return False
         return True
-
-G = PrimeGenerator()
-print(G.generate(40))
-print(G.generate(40))
