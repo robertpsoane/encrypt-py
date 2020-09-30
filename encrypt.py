@@ -15,7 +15,7 @@ class RSAEncryptor:
         self.e = 65537
         self.has_keys = False
 
-    def generateKeys(self, size):
+    def generateKeys(self, size = 2048):
         valid_primes = False
         while valid_primes == False:
             e = self.e
@@ -85,6 +85,7 @@ class RSAEncryptor:
         # Extracting 2 parts to public key
         n = public['n']
         e = public['e']
+        print(self.countBits(n))
 
         # Encoding message using encoder map
         num_message = self.encoder.encode(message)
@@ -201,7 +202,7 @@ class NumericalEncoder:
 RSA = RSAEncryptor()
 
 
-string_to_encrypt = "The christian students here going on about how many hardships they are facing and all the microaggresions they have to overcome every day jfc. Not to be overly gatekeep-y but is a tad hard to take seriously as literally any minority. Just shows how absolutely and entirely out of touch you all are. People suggesting that a faith is inherently homophobic, while understandably quite annoying, is not religious persecution.All the best, someone who can't trace their family back more than 3 generations cause of religious persecutions"
+string_to_encrypt = "Hello World"
 print('Encrypting \'{}\''.format(string_to_encrypt))
 ciphertext = RSA.encryptInput(string_to_encrypt)
 print('Encrypted Message: {}'.format(ciphertext))
@@ -209,9 +210,3 @@ private_key = RSA.private
 public_key = RSA.public
 return_text = RSA.decryptStoredKeys(ciphertext)
 print('Decrypted Message: {}'.format(return_text))
-'''
-
-a, b, n = 324, 57, 102123 
-print(RSA.powerCongruentModulo(a,b,n))
-print( pow(a,b) % n)
-'''
