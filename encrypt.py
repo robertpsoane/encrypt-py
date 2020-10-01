@@ -13,8 +13,7 @@ class RSAEncryptor:
         self.PrimeGenerator = PrimeGenerator()
         self.encoder = NumericalEncoder()
         self.e = 65537
-        self.has_keys = False
-
+        
     def generateKeys(self, size = 2048):
         valid_primes = False
         while valid_primes == False:
@@ -36,36 +35,7 @@ class RSAEncryptor:
         print(output_string.format(public['n'],public['e'],private))
         return private, public
 
-    def inputKeys():
-        pass
-
-    # Encrypt As One Function.  
-    # Initial encryption function written - it will encrypt entire message as one.
-    # Written during experimentation to get the algorithm working.  To be replaced
-    # Checks if object has keys stored. If object has no keys stored, this means 
-    # first time using object, and will generate new keys to encrypt message.  If the
-    # instance has keys stored, this means it has already been given keys to encrypt 
-    # and decrypt with and so will just apply the encryption algorithm using those keys.
-    def encryptAsOne(self, message): 
-        if self.has_keys == False:
-            self.message = message
-            self.encoded_message = self.encoder.encode(message)
-            message_size = self.countBits(self.encoded_message)
-            private, public = self.generateKeys(message_size)
-            self.private, self.public = private, public
-            self.has_keys = True
-        
-        # Extracting 2 parts to public key
-        n = public['n']
-        e = public['e']
-
-        # Encoding message using encoder map
-        num_message = self.encoder.encode(message)
-        encrypted_message = self.encrypt(e, n, num_message)
-        
-        return encrypted_message
-
-    # Main message encryption functions.  Will replace encryptAsOne once written
+    # Main message encryption functions.  
     # Aims: Break message into K letter strings, encrypt each string with Public
     # key, return fill message encrypted 
     def getPQSize(self, block_size = 10):
@@ -127,10 +97,6 @@ class RSAEncryptor:
     def encrypt(self, e, n, encoded_text):
         encrypted = self.powerCongruentModulo(encoded_text, e, n)
         return encrypted
-
-    def decryptStoredKeys(self, ciphertext):
-        text_message = self.decrypt(ciphertext, self.private, self.public)
-        return text_message
 
     def decrypt(self, ciphertext, private_key, public_key):
         n = public_key['n']
@@ -271,11 +237,13 @@ class NumericalEncoder:
 RSA = RSAEncryptor()
 
 test_secret_message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id nunc imperdiet, pretium odio mollis, lacinia velit. Vestibulum quis urna malesuada libero maximus lobortis. Nulla varius nisl id enim cursus tempor. Curabitur turpis libero, consequat vitae nibh rhoncus, viverra pellentesque leo. Nullam efficitur, lorem vel sodales scelerisque, tortor ipsum vestibulum neque, dapibus porttitor felis lacus eget tellus. Pellentesque quam felis, varius in lacus sed, eleifend suscipit velit. Praesent consectetur vel felis non semper'
-
+test_secret_message += test_secret_message
+test_secret_message += test_secret_message
+test_secret_message += test_secret_message
 print('Message to encrypt:\n{}\n'.format(test_secret_message))
-key_size = RSA.getPQSize(100)
+key_size = RSA.getPQSize(200)
 private, public = RSA.generateKeys(key_size)
-encrypted_message = RSA.encryptInBlocks(test_secret_message, public, 100)
+encrypted_message = RSA.encryptInBlocks(test_secret_message, public, 200)
 print('Encrypted Message:{}'.format(encrypted_message))
 decrypted_message = RSA.decryptFromBlocks(encrypted_message, private)
 print(decrypted_message)
