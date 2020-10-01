@@ -13,8 +13,7 @@ class RSAEncryptor:
         self.PrimeGenerator = PrimeGenerator()
         self.encoder = NumericalEncoder()
         self.e = 65537
-        self.has_keys = False
-
+        
     def generateKeys(self, size = 2048):
         valid_primes = False
         while valid_primes == False:
@@ -36,36 +35,7 @@ class RSAEncryptor:
         print(output_string.format(public['n'],public['e'],private))
         return private, public
 
-    def inputKeys():
-        pass
-
-    # Encrypt As One Function.  
-    # Initial encryption function written - it will encrypt entire message as one.
-    # Written during experimentation to get the algorithm working.  To be replaced
-    # Checks if object has keys stored. If object has no keys stored, this means 
-    # first time using object, and will generate new keys to encrypt message.  If the
-    # instance has keys stored, this means it has already been given keys to encrypt 
-    # and decrypt with and so will just apply the encryption algorithm using those keys.
-    def encryptAsOne(self, message): 
-        if self.has_keys == False:
-            self.message = message
-            self.encoded_message = self.encoder.encode(message)
-            message_size = self.countBits(self.encoded_message)
-            private, public = self.generateKeys(message_size)
-            self.private, self.public = private, public
-            self.has_keys = True
-        
-        # Extracting 2 parts to public key
-        n = public['n']
-        e = public['e']
-
-        # Encoding message using encoder map
-        num_message = self.encoder.encode(message)
-        encrypted_message = self.encrypt(e, n, num_message)
-        
-        return encrypted_message
-
-    # Main message encryption functions.  Will replace encryptAsOne once written
+    # Main message encryption functions.  
     # Aims: Break message into K letter strings, encrypt each string with Public
     # key, return fill message encrypted 
     def getPQSize(self, block_size = 10):
@@ -127,10 +97,6 @@ class RSAEncryptor:
     def encrypt(self, e, n, encoded_text):
         encrypted = self.powerCongruentModulo(encoded_text, e, n)
         return encrypted
-
-    def decryptStoredKeys(self, ciphertext):
-        text_message = self.decrypt(ciphertext, self.private, self.public)
-        return text_message
 
     def decrypt(self, ciphertext, private_key, public_key):
         n = public_key['n']
@@ -266,16 +232,21 @@ class NumericalEncoder:
         return output_string
 
 
-## Testing
+## Testing ##
 
-RSA = RSAEncryptor()
+def testEncryptDecrypt():
+    RSA = RSAEncryptor()
+    test_secret_message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In interdum egestas sapien, in vulputate mauris auctor vel. Integer faucibus lacus et justo tempor, sodales vehicula magna laoreet. Phasellus ut consectetur nisl, sit amet congue quam. Proin suscipit ut lacus ut porttitor. Morbi nec interdum nisl. Integer turpis lorem, porttitor egestas quam quis, pulvinar porta tellus. In rutrum nisi mi. Donec luctus, lorem et elementum pharetra, dui erat mollis erat, in ullamcorper ligula nunc ultricies ex. Nullam eu nisi ut nibh vulputate scelerisque sit amet ultrices orci. Vestibulum fermentum ac orci nec interdum. Pellentesque a porta diam, non luctus ipsum. Vestibulum sed nisl tempus, commodo sem at, finibus orci. Nunc in egestas risus, in ultricies mauris. Nam consequat ornare leo, vitae consectetur erat vehicula at. Curabitur purus neque, gravida vitae porttitor id, suscipit sit amet nibh. In accumsan augue sit amet tempor scelerisque. Vestibulum posuere lectus sit amet ligula tristique, quis hendrerit orci placerat. Curabitur laoreet interdum nulla, at commodo quam fermentum eget. Duis sit amet mi eros. Praesent iaculis, velit ac semper porta, nulla risus sodales purus, non porttitor neque velit eget felis. Suspendisse quis varius sapien. Nullam tellus ipsum, elementum ac purus et, ullamcorper euismod elit. Duis mollis efficitur augue quis consectetur. Aliquam vestibulum mauris laoreet lobortis tempus. Maecenas justo justo, placerat non fermentum vel, lacinia sit amet arcu. Nullam eget finibus mauris. Morbi sed suscipit quam, et semper orci. Maecenas et condimentum ligula. Pellentesque felis mi, malesuada ut lacus sed, rhoncus rutrum turpis. Vivamus congue lacinia tempus. Maecenas dictum non nisl at rutrum. Donec nisl arcu, accumsan eget pellentesque eu, molestie sit amet nunc. Donec ligula lectus, laoreet a porttitor sit amet, rutrum ut urna. Aliquam id diam porta, lobortis risus vel, mattis lorem. Praesent imperdiet ligula non mi placerat accumsan. Maecenas lacinia blandit tortor id imperdiet. In risus velit, interdum eget facilisis in, imperdiet ut leo. Cras vestibulum, arcu at aliquet tincidunt, neque nisi lacinia velit, in semper massa sapien eu sapien. Sed vulputate sit amet magna ac pulvinar. Phasellus vitae pulvinar metus. Suspendisse eu faucibus nisi, eu tincidunt nibh. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce tempor ante vel metus tristique, commodo euismod odio congue. In iaculis tincidunt tellus, sed consequat ligula accumsan at. Nulla ultrices felis augue, eget sodales leo venenatis a. Nam eu sapien at justo pretium rutrum aliquam ac tortor. Etiam quis molestie neque. Maecenas eu felis mollis, vehicula eros sed, egestas sem. Aliquam a sem ultrices eros commodo pellentesque. Quisque ut turpis auctor, vulputate justo non, porta velit. Pellentesque euismod dui ex, ac ullamcorper augue pharetra finibus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi varius dolor consequat euismod tincidunt. Morbi maximus imperdiet lorem. Integer lacinia gravida urna eget interdum. Sed eget lacinia tortor. Vestibulum vestibulum, nisl ut egestas lacinia, mauris lacus blandit tellus, ullamcorper pellentesque risus dolor sed turpis. Aliquam in dolor id massa auctor ultricies. Ut id suscipit erat. Sed eleifend commodo nunc sed consectetur. Sed vitae tincidunt velit. Proin finibus nunc eget elementum maximus. Aliquam vehicula convallis turpis, vel ultrices risus dictum et. Pellentesque a nisi eu justo eleifend pulvinar non non felis. Phasellus suscipit mauris sit amet accumsan elementum. Praesent vestibulum, velit vel gravida tempor, ex ante molestie nisi, sed aliquet elit orci in tortor. Suspendisse dapibus eleifend faucibus. Integer nec nibh id mi mattis hendrerit. Morbi eget nunc eu leo egestas finibus. Aliquam vitae sem pretium, porttitor arcu cursus, luctus nulla. Ut placerat, turpis ac imperdiet convallis, odio sem vehicula tortor, quis tempus est urna et ante. Nunc congue varius nisi ut fringilla. Nullam eget ipsum quis arcu gravida facilisis. Nunc pharetra justo in consequat cursus. Nam sit amet imperdiet magna. Integer ornare tellus purus, vel dignissim nunc interdum in. Nunc varius pellentesque metus. Suspendisse potenti. Cras eget euismod lorem. Proin porttitor arcu neque, eget consequat libero posuere eu. Suspendisse urna lacus, tristique efficitur laoreet eu, sodales maximus massa. Sed sodales turpis eget mauris blandit, nec venenatis leo eleifend. Sed velit turpis, efficitur eget libero eget, sollicitudin venenatis tortor. Aliquam convallis rhoncus leo a faucibus. Maecenas viverra quam vel scelerisque ultrices. Duis quis faucibus velit, a accumsan massa. Fusce in arcu id erat volutpat posuere. Nam dignissim metus ut est lobortis scelerisque. Integer euismod sapien elementum ipsum tincidunt molestie. Nam est magna, mattis sit amet tortor sed, dignissim porttitor elit. Pellentesque sed ligula porta, mollis nulla ac, tincidunt leo. Sed at dolor velit. Ut quis dictum urna. Maecenas ex erat, condimentum a suscipit eget, mollis sit amet orci. Cras rhoncus dolor velit. Praesent condimentum et sem id bibendum. Maecenas quis ipsum eget felis egestas accumsan. Donec faucibus nibh sed blandit viverra. Duis a fermentum arcu. Quisque varius non massa sit amet vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam eget egestas neque. Aliquam erat volutpat. Etiam non augue mauris. Fusce egestas dui in massa efficitur pellentesque gravida quis tortor. Praesent consequat eros et tincidunt egestas. Cras consequat mollis tortor in pretium. Pellentesque mollis condimentum mi, sit amet finibus lacus molestie eu. Vivamus consequat tincidunt faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Quisque a ex ut nisl ullamcorper tempor vel a purus. Aliquam ex metus, eleifend in eleifend id, aliquam et nisl. Integer id sapien eget dui feugiat lobortis. Proin congue, erat vitae commodo vehicula, ex diam vestibulum odio, tincidunt congue purus elit nec diam. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Maecenas ut cursus ante. Morbi et lectus eget nisi eleifend laoreet. Aenean consequat accumsan dapibus. Maecenas mattis facilisis nisi nec accumsan. Mauris magna leo, molestie ut nunc in, sollicitudin ultrices eros. Maecenas et est id lacus convallis fermentum sit amet ac diam. Quisque imperdiet tincidunt facilisis. Nullam consectetur convallis placerat. Integer auctor odio quis lacinia malesuada. Praesent fermentum felis blandit ante sodales, et euismod augue ullamcorper. Cras volutpat enim velit, sed molestie lorem varius non. Donec gravida nisl turpis. Cras placerat a magna.'
+    key_size = RSA.getPQSize(100)
+    private, public = RSA.generateKeys(key_size)
+    encrypted_message = RSA.encryptInBlocks(test_secret_message, public, 100)
+    decrypted_message = RSA.decryptFromBlocks(encrypted_message, private)
+    successful = (decrypted_message == test_secret_message)
+    output_string = 'Encryption and Decryption of 1000 words success: {}'.format(successful)
+    return output_string, successful
 
-test_secret_message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id nunc imperdiet, pretium odio mollis, lacinia velit. Vestibulum quis urna malesuada libero maximus lobortis. Nulla varius nisl id enim cursus tempor. Curabitur turpis libero, consequat vitae nibh rhoncus, viverra pellentesque leo. Nullam efficitur, lorem vel sodales scelerisque, tortor ipsum vestibulum neque, dapibus porttitor felis lacus eget tellus. Pellentesque quam felis, varius in lacus sed, eleifend suscipit velit. Praesent consectetur vel felis non semper'
+def tests():
+    string, boolean = testEncryptDecrypt()
+    print(string)
 
-print('Message to encrypt:\n{}\n'.format(test_secret_message))
-key_size = RSA.getPQSize(100)
-private, public = RSA.generateKeys(key_size)
-encrypted_message = RSA.encryptInBlocks(test_secret_message, public, 100)
-print('Encrypted Message:{}'.format(encrypted_message))
-decrypted_message = RSA.decryptFromBlocks(encrypted_message, private)
-print(decrypted_message)
+tests()
