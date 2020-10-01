@@ -36,44 +36,17 @@ class RSAEncryptor:
         print(output_string.format(public['n'],public['e'],private))
         return private, public
 
-    '''
-    functions egcd and modInv are from 
-    https://brilliant.org/wiki/modular-arithmetic/#modular-arithmetic-as-remainders 
-    on modular inverse
-    '''
-    def egcd(self, a, b):
-        x,y, u,v = 0,1, 1,0
-        while a != 0:
-            q, r = b//a, b%a
-            m, n = x-u*q, y-v*q
-            b,a, x,y, u,v = a,r, u,v, m,n
-        gd = b
-        return gd, x, y
-    
-    def modInv(self, a, m):
-        gd, x, y = self.egcd(a, m)
-        if gd != 1:
-            return None  # modular inverse does not exist
-        else:
-            return x % m
-
-    def phi(self, p, q):
-        return (p - 1) * (q - 1)
-
-    def countBits(self, n):
-        # Code from https://www.geeksforgeeks.org/count-total-bits-number/
-        # log function in base 2  
-        # take only integer part
-        return int((math.log(n) / math.log(2)) + 1)
-
     def inputKeys():
         pass
 
-    # Encrypt Input Function.  Checks if object has keys stored.  If object has no keys stored, 
-    # this means first time using object, and will generate new keys to encrypt message.  If the
-    # instance has keys stored, this means it has already been given keys to encrypt and decrypt 
-    # with and so will just apply the encryption algorithm using those keys.
-    def encryptInput(self, message):
+    # Encrypt As One Function.  
+    # Initial encryption function written - it will encrypt entire message as one.
+    # Written during experimentation to get the algorithm working.  To be replaced
+    # Checks if object has keys stored. If object has no keys stored, this means 
+    # first time using object, and will generate new keys to encrypt message.  If the
+    # instance has keys stored, this means it has already been given keys to encrypt 
+    # and decrypt with and so will just apply the encryption algorithm using those keys.
+    def encryptAsOne(self, message): 
         if self.has_keys == False:
             self.message = message
             self.encoded_message = self.encoder.encode(message)
@@ -85,13 +58,75 @@ class RSAEncryptor:
         # Extracting 2 parts to public key
         n = public['n']
         e = public['e']
-        print(self.countBits(n))
 
         # Encoding message using encoder map
         num_message = self.encoder.encode(message)
-
-        encrypted_message = self.powerCongruentModulo(num_message, e, n)
+        encrypted_message = self.encrypt(e, n, num_message)
+        
         return encrypted_message
+
+    # Main message encryption functions.  Will replace encryptAsOne once written
+    # Aims: Break message into K letter strings, encrypt each string with Public
+    # key, return fill message encrypted 
+    def getPQSize(self, block_size = 10):
+        # Used to find a suitable size for p and q
+        str_num = ''
+        for k in range(block_size+1):
+            str_num = str_num + '99'
+        max_bits = self.countBits(int(str_num))
+        return (max_bits // 2) + 1
+
+    def encryptInBlocks(self, message, public_key, block_size = 10):
+        '''
+        encryptInBlocks(self, message, block_size = 10, public_key)
+        Encrypts message in blocks of size block_size.  Larger block sizes make a 
+        harder code to decrypt but take longer to encrypt or decrypt
+        public_key = {"n":n, "e":e}
+        '''
+        split_string = self.splitString(message, block_size)
+        encrypted_message = str(public_key['n'])+'#'+str(public_key['e'])+'#'
+        for string in split_string:
+            encoded_string = self.encoder.encode(string)
+            encrypted_string = self.encrypt(public_key['e'], public_key['n'], encoded_string)
+            encrypted_message = encrypted_message + str(encrypted_string) + '#'
+        
+        # Removing extra # from end of message
+        encrypted_message = encrypted_message[:-1]
+        return encrypted_message
+    
+    def decryptFromBlocks(self, encrypted_message, private_key):
+        split_message = encrypted_message.split('#')
+        n, e = int(split_message[0]), int(split_message[1])
+        public_key = {'n':n,'e':e}
+        split_message = split_message[2:]
+        output_text = ''
+
+        # Decrypting in blocks
+        for block in split_message:
+            block = int(block)
+            decrypted_block = self.decrypt(block, private_key, public_key)
+            
+            output_text = output_text + decrypted_block
+        
+        return output_text
+
+    def splitString(self, input_string, K):
+        # Function to split a string into list of strings of K chars
+        string_length = len(input_string)
+        if string_length % K == 0:
+            n_strings = string_length / K
+        else:
+            n_strings = (string_length // K) + 1
+        split_string = []
+        for j in range(n_strings):
+            start = j*K
+            end = (j+1)*K
+            split_string.append(input_string[start:end])
+        return split_string
+     
+    def encrypt(self, e, n, encoded_text):
+        encrypted = self.powerCongruentModulo(encoded_text, e, n)
+        return encrypted
 
     def decryptStoredKeys(self, ciphertext):
         text_message = self.decrypt(ciphertext, self.private, self.public)
@@ -105,6 +140,8 @@ class RSAEncryptor:
         num_message = self.powerCongruentModulo(ciphertext, d, n)
         text_message = self.encoder.decode(num_message)
         return text_message
+    
+    # Mathematical Operation Functions #
     
     def powerCongruentModulo(self, c, d, n):
         # Calculates c^d (mod n) algorithmically
@@ -170,6 +207,36 @@ class RSAEncryptor:
             n += expansion[k] * pow(base,k)
         return n
 
+    '''
+    functions egcd and modInv are from 
+    https://brilliant.org/wiki/modular-arithmetic/#modular-arithmetic-as-remainders 
+    on modular inverse
+    '''
+    def egcd(self, a, b):
+        x,y, u,v = 0,1, 1,0
+        while a != 0:
+            q, r = b//a, b%a
+            m, n = x-u*q, y-v*q
+            b,a, x,y, u,v = a,r, u,v, m,n
+        gd = b
+        return gd, x, y
+    
+    def modInv(self, a, m):
+        gd, x, y = self.egcd(a, m)
+        if gd != 1:
+            return None  # modular inverse does not exist
+        else:
+            return x % m
+
+    def phi(self, p, q):
+        return (p - 1) * (q - 1)
+
+    def countBits(self, n):
+        # Code from https://www.geeksforgeeks.org/count-total-bits-number/
+        # log function in base 2  
+        # take only integer part
+        return int((math.log(n) / math.log(2)) + 1)
+
 
 class NumericalEncoder:
     def __init__(self):
@@ -199,14 +266,16 @@ class NumericalEncoder:
         return output_string
 
 
+## Testing
+
 RSA = RSAEncryptor()
 
+test_secret_message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id nunc imperdiet, pretium odio mollis, lacinia velit. Vestibulum quis urna malesuada libero maximus lobortis. Nulla varius nisl id enim cursus tempor. Curabitur turpis libero, consequat vitae nibh rhoncus, viverra pellentesque leo. Nullam efficitur, lorem vel sodales scelerisque, tortor ipsum vestibulum neque, dapibus porttitor felis lacus eget tellus. Pellentesque quam felis, varius in lacus sed, eleifend suscipit velit. Praesent consectetur vel felis non semper'
 
-string_to_encrypt = "Hello World"
-print('Encrypting \'{}\''.format(string_to_encrypt))
-ciphertext = RSA.encryptInput(string_to_encrypt)
-print('Encrypted Message: {}'.format(ciphertext))
-private_key = RSA.private
-public_key = RSA.public
-return_text = RSA.decryptStoredKeys(ciphertext)
-print('Decrypted Message: {}'.format(return_text))
+print('Message to encrypt:\n{}\n'.format(test_secret_message))
+key_size = RSA.getPQSize(100)
+private, public = RSA.generateKeys(key_size)
+encrypted_message = RSA.encryptInBlocks(test_secret_message, public, 100)
+print('Encrypted Message:{}'.format(encrypted_message))
+decrypted_message = RSA.decryptFromBlocks(encrypted_message, private)
+print(decrypted_message)
