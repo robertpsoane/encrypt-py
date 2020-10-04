@@ -1,2 +1,3 @@
-# encrypt-py
-Attempt at Python encryption script from scratch
+# Python Password Manager
+
+A secure GUI password manager written in Python.
