@@ -2,7 +2,7 @@
 # Importing PrimeGenerator - Up to date can be found at https://github.com/robertpsoane/py-generators
 # Only uses Prime generator which is unlikely to be updated
 from pygenerators.generators import PrimeGenerator
-from map_generator import generateMaps
+from programfiles.map_generator import generateMaps
 import math
 from math import gcd
 
@@ -249,4 +249,6 @@ def tests():
     string, boolean = testEncryptDecrypt()
     print(string)
 
-tests()
+
+# Uncomment below to run test
+# tests()
